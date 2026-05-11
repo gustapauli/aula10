@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aula 10 — Iluminismo</title>
+<style>
+  :root {
+    --bg: #F4EFE6;
+    --bg-deep: #1A1814;
+    --ink: #1A1814;
+    --ink-soft: #4A4640;
+    --paper: #FBF7EF;
+    --accent: #B8862F;
+    --accent-soft: #E8C77A;
+    --line: rgba(26,24,20,0.12);
+    --correct: #2E7D4F;
+    --wrong: #B5342B;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .app {
+    position: fixed;
+    inset: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .progress {
+    position: absolute;
+    top: 10px; left: 12px; right: 12px;
+    height: 18px;
+    display: flex;
+    gap: 2px;
+    z-index: 50;
+    align-items: center;
+    cursor: pointer;
+  }
+  .seg {
+    flex: 1;
+    height: 3px;
+    background: rgba(26,24,20,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    transition: height 0.2s ease;
+  }
+  .seg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .seg.done::after { transform: scaleX(1); }
+  .seg.current::after { transform: scaleX(1); }
+  .seg.current { height: 4px; }
+
+  .header {
+    position: absolute;
+    top: 34px; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 40;
+    pointer-events: none;
+  }
+  .header span {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .slides { position: absolute; inset: 0; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 80px 28px 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  .slide.prev { transform: translateX(-40px); }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(28px, 8vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  h1 em, h2 em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(24px, 7vw, 32px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-bottom: 14px;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  p {
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  p + p { margin-top: 14px; }
+  .big {
+    font-family: var(--serif);
+    font-size: clamp(22px, 6.5vw, 28px);
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.35;
+    color: var(--ink);
+    border-left: 2px solid var(--accent);
+    padding-left: 18px;
+    margin: 8px 0;
+  }
+  .number {
+    font-family: var(--serif);
+    font-size: 88px;
+    font-weight: 800;
+    line-height: 0.9;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+  }
+  .label {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .slide.active > * {
+    animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  }
+  .slide.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .slide.active > *:nth-child(2) { animation-delay: 0.18s; }
+  .slide.active > *:nth-child(3) { animation-delay: 0.31s; }
+  .slide.active > *:nth-child(4) { animation-delay: 0.44s; }
+  .slide.active > *:nth-child(5) { animation-delay: 0.57s; }
+  .slide.active > *:nth-child(6) { animation-delay: 0.70s; }
+  .slide.active > *:nth-child(7) { animation-delay: 0.83s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tap-zone {
+    position: absolute;
+    top: 60px; bottom: 0;
+    width: 35%;
+    z-index: 30;
+    cursor: pointer;
+  }
+  .tap-zone.left { left: 0; }
+  .tap-zone.right { right: 0; }
+
+  .footer-hint {
+    position: absolute;
+    bottom: 18px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    opacity: 0.6;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .footer-hint .arrow {
+    display: inline-block;
+    animation: nudge 2s ease-in-out infinite;
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+  }
+
+  .illu {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto 18px;
+    display: block;
+  }
+  .illu.sm { max-width: 180px; }
+  .illu.lg { max-width: 320px; }
+  .illu svg { width: 100%; height: auto; display: block; }
+
+  .draw path, .draw line, .draw circle, .draw rect, .draw polygon, .draw polyline {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw 1.6s 0.3s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .pulse-dot { animation: pulseDot 1.8s ease-in-out infinite; }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  .cover {
+    background: var(--bg-deep);
+    color: var(--paper);
+  }
+  .cover h1 { color: var(--paper); }
+  .cover .eyebrow { color: var(--accent-soft); }
+  .cover p { color: rgba(251,247,239,0.7); }
+  .cover .footer-hint { color: rgba(251,247,239,0.5); }
+
+  .quiz-intro { text-align: center; }
+  .quiz-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--paper);
+    animation: popIn 0.6s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .question-num {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .question {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 600;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .option:active { transform: scale(0.98); }
+  .option .letter {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+    transition: all 0.2s ease;
+  }
+  .option.correct {
+    background: rgba(46, 125, 79, 0.08);
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+  .option.correct .letter {
+    background: var(--correct);
+    color: white;
+    border-color: var(--correct);
+  }
+  .option.wrong {
+    background: rgba(181, 52, 43, 0.06);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+  .option.wrong .letter {
+    background: var(--wrong);
+    color: white;
+    border-color: var(--wrong);
+  }
+  .option.disabled { pointer-events: none; opacity: 0.55; }
+
+  .feedback {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+  }
+  .feedback.show {
+    opacity: 1;
+    max-height: 500px;
+  }
+  .feedback.right {
+    background: rgba(46, 125, 79, 0.08);
+    color: var(--correct);
+    border: 1px solid rgba(46, 125, 79, 0.2);
+  }
+  .feedback.miss {
+    background: rgba(181, 52, 43, 0.06);
+    color: var(--ink);
+    border: 1px solid rgba(181, 52, 43, 0.2);
+  }
+  .feedback strong { font-weight: 700; }
+  .feedback .head {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 600;
+  }
+
+  .end {
+    background: var(--bg-deep);
+    color: var(--paper);
+    text-align: center;
+  }
+  .end h2 { color: var(--paper); }
+  .end p { color: rgba(251,247,239,0.7); }
+  .end .score {
+    font-family: var(--serif);
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--accent-soft);
+    line-height: 1;
+    margin: 20px 0;
+  }
+  .restart {
+    margin-top: 28px;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .restart:active { transform: scale(0.96); }
+
+  .slide::-webkit-scrollbar { display: none; }
+  .slide { scrollbar-width: none; }
+
+  .card-soft {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .stamp {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+  .stamp.dark {
+    background: var(--bg-deep);
+    color: var(--accent-soft);
+  }
+
+  .thinker-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 12px;
+  }
+  .thinker-card .top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .thinker-card .avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .thinker-card .avatar svg { width: 32px; height: 32px; }
+  .thinker-card .name {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .thinker-card .life {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="progress" id="progress"></div>
+  <div class="header">
+    <span>Aula 10</span>
+    <span id="counter">1 / 1</span>
+  </div>
+
+  <div class="slides" id="slides">
+
+    <!-- ============ 1 — CAPA ============ -->
+    <section class="slide cover active">
+      <div class="eyebrow">Filosofia / História · Aula 10</div>
+      <h1>Iluminismo. Quando a humanidade decidiu <em>pensar por conta própria</em>.</h1>
+      <p style="margin-top: 16px;">E o mundo nunca mais foi o mesmo.</p>
+      <div class="illu" style="margin-top: 36px;">
+        <svg viewBox="0 0 240 140" class="draw" fill="none" stroke="#E8C77A" stroke-width="1.5">
+          <!-- vela/luz -->
+          <path d="M120 40 Q115 30 120 22 Q125 30 120 40" fill="#E8C77A" stroke="#E8C77A"/>
+          <path d="M120 40 L120 95"/>
+          <ellipse cx="120" cy="95" rx="10" ry="3"/>
+          <!-- raios -->
+          <path d="M120 18 L120 8" stroke-dasharray="2 3"/>
+          <path d="M100 30 L88 22" stroke-dasharray="2 3"/>
+          <path d="M140 30 L152 22" stroke-dasharray="2 3"/>
+          <path d="M95 50 L80 50" stroke-dasharray="2 3"/>
+          <path d="M145 50 L160 50" stroke-dasharray="2 3"/>
+          <!-- círculo de luz -->
+          <circle cx="120" cy="35" r="38" stroke-dasharray="3 4" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="footer-hint">toque na lateral pra avançar <span class="arrow">→</span></div>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section class="slide">
+      <p class="big">Oi.</p>
+      <p style="margin-top: 18px;">Hoje a gente vai falar do <strong>Iluminismo</strong>.</p>
+      <p>Presta atenção. Essa aula talvez seja a mais importante do bloco até aqui.</p>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section class="slide">
+      <div class="eyebrow">Por quê?</div>
+      <p class="big">O Iluminismo é o <em>sistema operacional</em> do mundo em que você vive.</p>
+      <div class="illu" style="margin-top: 22px; max-width: 220px;">
+        <svg viewBox="0 0 220 120" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <rect x="30" y="20" width="160" height="90" rx="6"/>
+          <circle cx="110" cy="65" r="22"/>
+          <path d="M110 50 L110 45 M110 85 L110 80 M95 65 L90 65 M130 65 L125 65 M100 55 L96 51 M120 55 L124 51 M100 75 L96 79 M120 75 L124 79"/>
+          <circle cx="110" cy="65" r="6" fill="#B8862F"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section class="slide">
+      <p>Tudo que você acha natural hoje:</p>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Você tem direitos.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Governo presta contas.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Religião não manda na sua vida.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Ciência tem mais autoridade que tradição.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Todo mundo é igual perante a lei.</div>
+      </div>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section class="slide">
+      <p>Tudo isso foi <strong>inventado, no papel</strong>, por um grupo de filósofos europeus.</p>
+      <p style="margin-top: 12px;">Entre o final do século 17 e o final do século 18.</p>
+      <p class="big" style="margin-top: 18px;">Antes deles, <em>nada</em> disso era óbvio.</p>
+      <p style="margin-top: 10px;">Depois deles, virou base.</p>
+    </section>
+
+    <!-- ============ 6 — onde paramos ============ -->
+    <section class="slide">
+      <div class="eyebrow">Pra entender, lembra</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="card-soft" style="padding: 14px;">
+          <div class="label" style="margin-bottom: 4px;">Aula 8 · Renascimento</div>
+          <p style="font-size: 15px;">O ser humano voltou pro centro. A imprensa espalhou conhecimento.</p>
+        </div>
+        <div class="card-soft" style="padding: 14px;">
+          <div class="label" style="margin-bottom: 4px;">Aula 9 · Reforma</div>
+          <p style="font-size: 15px;">A autoridade religiosa única foi rachada. Plantou-se a semente do individualismo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7 — Revolução Científica ============ -->
+    <section class="slide">
+      <p>E entre essas duas aulas e o Iluminismo, aconteceu uma coisa que mudou o jogo.</p>
+      <p class="big" style="margin-top: 14px; color: var(--accent);">A Revolução Científica.</p>
+      <div class="illu" style="margin: 22px auto; max-width: 200px;">
+        <svg viewBox="0 0 200 120" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <!-- órbitas -->
+          <circle cx="100" cy="60" r="50" opacity="0.4"/>
+          <circle cx="100" cy="60" r="35" opacity="0.6"/>
+          <circle cx="100" cy="60" r="20"/>
+          <!-- sol -->
+          <circle cx="100" cy="60" r="6" fill="#B8862F"/>
+          <!-- planetas -->
+          <circle cx="120" cy="60" r="3" fill="#B8862F"/>
+          <circle cx="135" cy="50" r="3" fill="#B8862F"/>
+          <circle cx="100" cy="110" r="3" fill="#B8862F"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ 8 — Newton ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Isaac Newton</div>
+            <div class="life">Inglês · 1643—1727</div>
+          </div>
+        </div>
+        <p style="font-size: 15px;">Em <strong>1687</strong>, publicou o <em>Principia Mathematica</em>.</p>
+      </div>
+      <p style="margin-top: 16px;">Nesse livro, fez uma coisa absurda.</p>
+      <p>Explicou, com <strong>três equações</strong>, como funciona o universo inteiro.</p>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section class="slide">
+      <p>Por que a maçã cai.</p>
+      <div class="illu sm" style="margin: 16px auto;">
+        <svg viewBox="0 0 120 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <!-- árvore -->
+          <path d="M30 90 L30 60"/>
+          <circle cx="30" cy="45" r="18"/>
+          <!-- maçã caindo -->
+          <circle cx="60" cy="35" r="4" fill="#B8862F"/>
+          <circle cx="65" cy="55" r="4" fill="#B8862F" opacity="0.6"/>
+          <circle cx="70" cy="78" r="4" fill="#B8862F" opacity="0.3"/>
+          <path d="M60 35 L70 78" stroke-dasharray="2 3" opacity="0.5"/>
+          <!-- chão -->
+          <path d="M10 90 L110 90"/>
+        </svg>
+      </div>
+      <p>Por que a Lua gira em volta da Terra.</p>
+      <p>Por que os planetas orbitam o Sol.</p>
+      <p class="big" style="margin-top: 14px;">Tudo, com <em>matemática</em>.</p>
+    </section>
+
+    <!-- ============ 10 — impacto ============ -->
+    <section class="slide">
+      <p>Pensa o impacto.</p>
+      <p style="margin-top: 12px;">Por <strong>mil e quinhentos anos</strong>, quando alguém perguntava por que as coisas no céu se mexem, a resposta era…</p>
+      <p class="quote" style="margin-top: 14px;">"Deus quer assim."</p>
+      <p style="margin-top: 14px;">Newton chegou e disse:</p>
+      <p class="quote" style="margin-top: 8px;">"Não. É essa fórmula aqui."</p>
+      <p style="margin-top: 12px;">E provou. Mostrou. Funcionou.</p>
+    </section>
+
+    <!-- ============ 11 — A pergunta ============ -->
+    <section class="slide">
+      <div class="eyebrow">A pergunta que ficou</div>
+      <p>Se Newton explicou o universo físico com a razão…</p>
+      <p class="big" style="margin-top: 14px;">…por que não usar a razão pra explicar <em>o resto</em>?</p>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">A política?</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">A economia?</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">A moral?</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">A religião?</div>
+      </div>
+    </section>
+
+    <!-- ============ 12 ============ -->
+    <section class="slide">
+      <p>É exatamente isso que o Iluminismo vai tentar.</p>
+      <p class="big" style="margin-top: 14px;">Aplicar o método racional <em>ao mundo humano</em>.</p>
+      <p style="margin-top: 16px;">O nome vem dessa metáfora. A razão é uma <strong>luz</strong>.</p>
+      <p>Que dissipa as trevas da ignorância, do dogma, da superstição.</p>
+      <p style="margin-top: 12px; font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--accent);">O Século das Luzes.</p>
+    </section>
+
+    <!-- ============ 13 — por que na Europa ============ -->
+    <section class="slide">
+      <div class="eyebrow">Mas antes</div>
+      <h2>Por que aconteceu na Europa? E principalmente na <em>França</em>?</h2>
+      <p style="margin-top: 14px;">Porque tinha condições.</p>
+    </section>
+
+    <!-- ============ 14 — condições ============ -->
+    <section class="slide">
+      <div class="eyebrow">As condições</div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+        <div style="padding: 12px 14px; background: var(--paper); border-radius: 10px; font-size: 14px;"><strong>Burguesia rica</strong>, barrada por nobreza e Igreja.</div>
+        <div style="padding: 12px 14px; background: var(--paper); border-radius: 10px; font-size: 14px;"><strong>Imprensa</strong>, espalhando ideia rápido.</div>
+        <div style="padding: 12px 14px; background: var(--paper); border-radius: 10px; font-size: 14px;"><strong>Cafés, salões, lojas maçônicas</strong> — lugares de debate.</div>
+        <div style="padding: 12px 14px; background: var(--paper); border-radius: 10px; font-size: 14px;"><strong>Antigo Regime</strong> — monarquia absolutista podre.</div>
+      </div>
+      <p class="big" style="margin-top: 16px;">Era um barril de pólvora intelectual.</p>
+      <p style="margin-top: 8px;">Só faltava alguém riscar o fósforo.</p>
+    </section>
+
+    <!-- ============ 15 ============ -->
+    <section class="slide">
+      <p class="big" style="text-align: center;">E os iluministas riscaram.</p>
+      <div class="illu" style="margin: 22px auto; max-width: 160px;">
+        <svg viewBox="0 0 160 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <!-- fósforo -->
+          <path d="M40 80 L100 30"/>
+          <ellipse cx="105" cy="25" rx="6" ry="4" fill="#B8862F"/>
+          <!-- chama -->
+          <path d="M105 22 Q102 12 105 4 Q108 12 105 22" fill="#E8C77A" stroke="#B8862F"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ 16 — vamos aos personagens ============ -->
+    <section class="slide">
+      <div class="eyebrow">Vamos aos personagens</div>
+      <p>Vou te apresentar uns <strong>sete ou oito</strong>.</p>
+      <p style="margin-top: 12px;">Agrupados por região e linha de pensamento.</p>
+      <p class="big" style="margin-top: 14px;">Iluminismo <em>não foi bloco único</em>.</p>
+      <p style="margin-top: 10px;">Foi um movimento com várias correntes — às vezes contraditórias entre si.</p>
+    </section>
+
+    <!-- ============ 17 — Inglaterra ============ -->
+    <section class="slide">
+      <div class="eyebrow">Começo pela Inglaterra</div>
+      <h2>Porque foi <em>lá</em> que começou.</h2>
+      <div class="illu" style="margin-top: 22px; max-width: 160px;">
+        <svg viewBox="0 0 160 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <path d="M30 70 Q40 40 60 50 Q80 30 100 50 Q120 40 130 70 Z"/>
+          <circle cx="70" cy="60" r="2" fill="#B8862F"/>
+          <circle cx="100" cy="58" r="2" fill="#B8862F"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ 18 — Locke ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">John Locke</div>
+            <div class="life">Inglês · 1632—1704</div>
+          </div>
+        </div>
+        <p style="font-size: 15px;">Na minha opinião: o <strong>pai do liberalismo</strong>.</p>
+        <p style="font-size: 15px; margin-top: 8px;">O filósofo que mais influenciou o mundo prático em que a gente vive.</p>
+      </div>
+    </section>
+
+    <!-- ============ 19 ============ -->
+    <section class="slide">
+      <p>Em <strong>1689</strong>, escreveu:</p>
+      <p style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--accent); margin-top: 8px;">"Dois Tratados sobre o Governo Civil."</p>
+      <p style="margin-top: 18px;">Pra época, a ideia central era <strong>radical</strong>.</p>
+    </section>
+
+    <!-- ============ 20 — 3 direitos naturais ============ -->
+    <section class="slide">
+      <div class="eyebrow">Todo ser humano nasce com:</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px;">
+        <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 6px; text-align: center;">
+          <svg viewBox="0 0 36 36" fill="none" stroke="#B8862F" stroke-width="1.5" style="width:36px;height:36px;margin:0 auto 6px;display:block;">
+            <path d="M18 30 Q6 22 6 14 Q6 8 12 8 Q16 8 18 12 Q20 8 24 8 Q30 8 30 14 Q30 22 18 30 Z"/>
+          </svg>
+          <div style="font-family: var(--serif); font-size: 13px; font-weight: 600;">Vida</div>
+        </div>
+        <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 6px; text-align: center;">
+          <svg viewBox="0 0 36 36" fill="none" stroke="#B8862F" stroke-width="1.5" style="width:36px;height:36px;margin:0 auto 6px;display:block;">
+            <path d="M10 26 L10 14 Q10 8 18 8 Q26 8 26 14"/>
+            <path d="M14 26 L22 26"/>
+            <circle cx="14" cy="26" r="2"/>
+            <circle cx="22" cy="26" r="2"/>
+          </svg>
+          <div style="font-family: var(--serif); font-size: 13px; font-weight: 600;">Liberdade</div>
+        </div>
+        <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 6px; text-align: center;">
+          <svg viewBox="0 0 36 36" fill="none" stroke="#B8862F" stroke-width="1.5" style="width:36px;height:36px;margin:0 auto 6px;display:block;">
+            <path d="M8 30 L8 18 L18 10 L28 18 L28 30 Z"/>
+            <path d="M15 30 L15 22 L21 22 L21 30"/>
+          </svg>
+          <div style="font-family: var(--serif); font-size: 13px; font-weight: 600;">Propriedade</div>
+        </div>
+      </div>
+      <p style="margin-top: 18px;">Não vêm do rei. Não vêm da Igreja.</p>
+      <p class="big" style="margin-top: 8px;">Nascem com você. Por você ser humano.</p>
+    </section>
+
+    <!-- ============ 21 — contrato ============ -->
+    <section class="slide">
+      <p>O governo só existe pra <strong>proteger</strong> esses direitos.</p>
+      <div class="illu sm" style="margin: 18px auto;">
+        <svg viewBox="0 0 160 80" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <circle cx="40" cy="40" r="14"/>
+          <path d="M55 36 L105 36 M55 44 L105 44" stroke-dasharray="3 3"/>
+          <rect x="110" y="26" width="36" height="28" rx="3"/>
+          <path d="M118 38 L140 38"/>
+        </svg>
+      </div>
+      <p>É um <strong>contrato</strong> entre o povo e quem governa.</p>
+      <p style="margin-top: 10px;">Se o governo viola os direitos, o contrato tá quebrado.</p>
+      <p class="big" style="margin-top: 14px; color: var(--accent);">E o povo tem o direito de derrubar esse governo.</p>
+    </section>
+
+    <!-- ============ 22 — tamanho da bomba ============ -->
+    <section class="slide">
+      <p>Pensa o tamanho da bomba.</p>
+      <p style="margin-top: 12px;">Por mil anos, a Europa achava que o rei era escolhido por Deus.</p>
+      <p style="margin-top: 8px;"><strong>Direito divino dos reis.</strong></p>
+      <p style="margin-top: 12px;">Questionar o rei = questionar Deus.</p>
+      <p class="quote" style="margin-top: 16px;">Locke chegou e disse: "Não. Rei é funcionário. Se o funcionário fizer merda, demite."</p>
+    </section>
+
+    <!-- ============ 23 — eco nos EUA ============ -->
+    <section class="slide">
+      <div class="eyebrow">80 anos depois</div>
+      <p>Essa ideia aparece, <strong>quase palavra por palavra</strong>, na Declaração de Independência dos Estados Unidos.</p>
+      <p class="quote" style="margin-top: 14px; font-size: 17px;">"Todos os homens são criados iguais, dotados pelo Criador de certos direitos inalienáveis: vida, liberdade e busca da felicidade."</p>
+      <p style="margin-top: 12px;">Thomas Jefferson basicamente <strong>copiou Locke</strong>.</p>
+      <p style="margin-top: 6px; font-size: 14px; color: var(--ink-soft); font-style: italic;">Trocou "propriedade" por "busca da felicidade". Só.</p>
+    </section>
+
+    <!-- ============ 24 — França ============ -->
+    <section class="slide">
+      <div class="eyebrow">Agora pra França</div>
+      <h2>Onde o Iluminismo virou <em>movimento de massa</em>.</h2>
+      <div class="illu" style="margin-top: 22px; max-width: 140px;">
+        <svg viewBox="0 0 60 90" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <rect x="10" y="20" width="40" height="60"/>
+          <path d="M10 20 L30 8 L50 20"/>
+          <rect x="26" y="50" width="8" height="30"/>
+          <rect x="16" y="30" width="6" height="8"/>
+          <rect x="38" y="30" width="6" height="8"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ 25 — Montesquieu ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Montesquieu</div>
+            <div class="life">Francês · 1689—1755</div>
+          </div>
+        </div>
+        <p style="font-size: 14px; color: var(--ink-soft);">Charles-Louis de Secondat, Barão de Montesquieu.</p>
+        <p style="font-size: 15px; margin-top: 8px;">Em <strong>1748</strong>: <em>O Espírito das Leis</em>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 26 — 3 poderes ============ -->
+    <section class="slide">
+      <div class="eyebrow">A ideia</div>
+      <h2>A separação dos <em>três poderes</em>.</h2>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+        <div class="card-soft" style="padding: 14px;">
+          <div class="label" style="margin-bottom: 4px; color: var(--accent);">Executivo</div>
+          <p style="font-size: 15px;">Executa as leis.</p>
+        </div>
+        <div class="card-soft" style="padding: 14px;">
+          <div class="label" style="margin-bottom: 4px; color: var(--accent);">Legislativo</div>
+          <p style="font-size: 15px;">Faz as leis.</p>
+        </div>
+        <div class="card-soft" style="padding: 14px;">
+          <div class="label" style="margin-bottom: 4px; color: var(--accent);">Judiciário</div>
+          <p style="font-size: 15px;">Julga quem desobedeceu.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 27 — equilíbrio ============ -->
+    <section class="slide">
+      <p>O segredo: os três são <strong>independentes</strong>.</p>
+      <div class="illu" style="margin: 18px auto; max-width: 220px;">
+        <svg viewBox="0 0 220 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <circle cx="40" cy="50" r="22"/>
+          <circle cx="110" cy="50" r="22"/>
+          <circle cx="180" cy="50" r="22"/>
+          <path d="M62 50 L88 50"/>
+          <path d="M85 45 L88 50 L85 55"/>
+          <path d="M132 50 L158 50"/>
+          <path d="M155 45 L158 50 L155 55"/>
+          <path d="M150 70 Q110 90 70 70"/>
+          <path d="M73 67 L70 70 L73 73"/>
+        </svg>
+      </div>
+      <p>Um vigia o outro. Um freia o outro.</p>
+    </section>
+
+    <!-- ============ 28 ============ -->
+    <section class="slide">
+      <p>Por quê?</p>
+      <p class="quote" style="margin-top: 12px;">Todo poder tende a abusar.</p>
+      <p style="margin-top: 12px;">Se você concentra tudo numa pessoa só, ela vira <strong>tirano</strong>.</p>
+      <p>Sempre. Não é questão de ser bom ou ruim.</p>
+      <p style="margin-top: 12px;">É natureza humana.</p>
+    </section>
+
+    <!-- ============ 29 ============ -->
+    <section class="slide">
+      <p>Hoje, essa ideia tá em quase toda Constituição democrática do planeta.</p>
+      <p style="margin-top: 10px;">Inclusive a brasileira.</p>
+      <p class="big" style="margin-top: 16px;">Quando o Congresso briga com o Supremo, é <em>Montesquieu funcionando</em>.</p>
+      <p style="margin-top: 12px;">Não é falha do sistema. É o sistema fazendo o que foi desenhado pra fazer.</p>
+    </section>
+
+    <!-- ============ 30 — Voltaire ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Voltaire</div>
+            <div class="life">Francês · 1694—1778</div>
+          </div>
+        </div>
+        <p style="font-size: 14px; color: var(--ink-soft);">Nome real: François-Marie Arouet. Voltaire era pseudônimo.</p>
+      </div>
+      <p style="margin-top: 16px;">Não era filósofo sistemático. Era <strong>polemista</strong>. Agitador.</p>
+      <p style="margin-top: 8px;">Escrevia panfleto, peça, conto, sátira — contra tudo que considerava opressão.</p>
+    </section>
+
+    <!-- ============ 31 — 2 alvos ============ -->
+    <section class="slide">
+      <div class="eyebrow">Os dois alvos preferidos</div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+        <div class="card-soft" style="padding: 14px;">
+          <p style="font-family: var(--serif); font-size: 17px;">A <em>Igreja Católica</em>.</p>
+        </div>
+        <div class="card-soft" style="padding: 14px;">
+          <p style="font-family: var(--serif); font-size: 17px;">O <em>absolutismo</em>.</p>
+        </div>
+      </div>
+      <p style="margin-top: 18px;">E defendia ferozmente:</p>
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px; border-left: 3px solid var(--accent);">Tolerância religiosa.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px; border-left: 3px solid var(--accent);">Liberdade de expressão.</div>
+      </div>
+    </section>
+
+    <!-- ============ 32 — frase ============ -->
+    <section class="slide">
+      <p class="quote" style="font-size: 20px;">"Eu posso não concordar com uma palavra do que você diz, mas defenderei até a morte o seu direito de dizê-lo."</p>
+      <p style="margin-top: 12px; font-size: 13px; color: var(--ink-soft); font-style: italic;">Atribuída a Voltaire. Captura o espírito dele.</p>
+      <p class="big" style="margin-top: 18px;">Voltaire é o <em>pai espiritual</em> da liberdade de expressão moderna.</p>
+    </section>
+
+    <!-- ============ 33 ============ -->
+    <section class="slide">
+      <p>E continua atual.</p>
+      <p style="margin-top: 12px;">Toda vez que você vê alguém debatendo se é certo:</p>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Censurar opinião ofensiva.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Cancelar alguém por algo que disse.</div>
+      </div>
+      <p class="big" style="margin-top: 16px;">…tá debatendo Voltaire.</p>
+    </section>
+
+    <!-- ============ 34 — Rousseau ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Jean-Jacques Rousseau</div>
+            <div class="life">Suíço · 1712—1778</div>
+          </div>
+        </div>
+        <p style="font-size: 15px;">O iluminista mais <strong>radical</strong>. Mais polêmico. Mais incompreendido.</p>
+      </div>
+    </section>
+
+    <!-- ============ 35 — frase Rousseau ============ -->
+    <section class="slide">
+      <p>Em <strong>1762</strong>, publicou:</p>
+      <p style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--accent); margin-top: 8px;">"O Contrato Social."</p>
+      <p style="margin-top: 18px;">O livro começa com uma das frases mais famosas da filosofia política:</p>
+      <p class="quote" style="margin-top: 14px;">"O homem nasce livre, e por toda parte está acorrentado."</p>
+    </section>
+
+    <!-- ============ 36 ============ -->
+    <section class="slide">
+      <p>Pra Rousseau, o ser humano <strong>nasce bom</strong>.</p>
+      <div class="illu sm" style="margin: 16px auto;">
+        <svg viewBox="0 0 120 80" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <circle cx="60" cy="30" r="10"/>
+          <path d="M50 40 L40 60 M70 40 L80 60 M55 38 L55 60 M65 38 L65 60"/>
+          <path d="M20 70 Q60 60 100 70"/>
+          <path d="M25 70 L25 78 M40 72 L40 78 M75 72 L75 78 M95 70 L95 78"/>
+        </svg>
+      </div>
+      <p>Nasce livre. Igual aos outros. Em harmonia com a natureza.</p>
+      <p style="margin-top: 12px;">O que corrompe é <strong>a sociedade</strong>.</p>
+    </section>
+
+    <!-- ============ 37 — vontade geral ============ -->
+    <section class="slide">
+      <p>A solução? Refundar a sociedade num contrato novo.</p>
+      <p style="margin-top: 12px;">Baseado na <strong>vontade geral</strong>.</p>
+      <p style="margin-top: 14px;">Vontade geral não é a soma das vontades individuais.</p>
+      <p class="big" style="margin-top: 12px; color: var(--accent);">É o que o povo, como coletivo, quer pro bem comum.</p>
+    </section>
+
+    <!-- ============ 38 ============ -->
+    <section class="slide">
+      <p>Rousseau é o filósofo da:</p>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Soberania popular.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Democracia.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Igualdade.</div>
+      </div>
+      <p style="margin-top: 14px;">Vai inspirar a fase mais radical da Revolução Francesa — a fase <strong>jacobina</strong>, com Robespierre.</p>
+    </section>
+
+    <!-- ============ 39 — Locke vs Rousseau ============ -->
+    <section class="slide">
+      <div class="eyebrow">Detalhe importante</div>
+      <p>Locke e Rousseau são quase <strong>opostos</strong>.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
+        <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px;">
+          <div class="label" style="margin-bottom: 6px;">Locke</div>
+          <p style="font-size: 13px;">Indivíduo. Propriedade. Estado mínimo.</p>
+        </div>
+        <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px;">
+          <div class="label" style="margin-bottom: 6px;">Rousseau</div>
+          <p style="font-size: 13px;">Coletivo. Igualdade. Estado forte.</p>
+        </div>
+      </div>
+      <p style="margin-top: 16px; font-size: 14px; color: var(--ink-soft); font-style: italic;">Direita e esquerda, no fundo, ainda brigam dentro dessa moldura.</p>
+    </section>
+
+    <!-- ============ 40 — Diderot e d'Alembert ============ -->
+    <section class="slide">
+      <div class="eyebrow">Diderot e d'Alembert</div>
+      <p>Fizeram a obra mais importante do Iluminismo, em termos práticos.</p>
+      <div class="illu" style="margin: 20px auto; max-width: 240px;">
+        <svg viewBox="0 0 240 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <rect x="10" y="20" width="22" height="70"/>
+          <rect x="34" y="22" width="22" height="68"/>
+          <rect x="58" y="18" width="22" height="72"/>
+          <rect x="82" y="24" width="22" height="66"/>
+          <rect x="106" y="20" width="22" height="70"/>
+          <rect x="130" y="22" width="22" height="68"/>
+          <rect x="154" y="18" width="22" height="72"/>
+          <rect x="178" y="24" width="22" height="66"/>
+          <rect x="202" y="20" width="22" height="70"/>
+          <path d="M14 40 L28 40 M38 40 L52 40 M62 40 L76 40 M86 40 L100 40 M110 40 L124 40 M134 40 L148 40 M158 40 L172 40 M182 40 L196 40 M206 40 L220 40"/>
+        </svg>
+      </div>
+      <p>Entre <strong>1751 e 1772</strong>, organizaram a <em>Enciclopédia</em>.</p>
+    </section>
+
+    <!-- ============ 41 — números ============ -->
+    <section class="slide">
+      <div class="eyebrow">A Enciclopédia em números</div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+        <div style="padding: 14px; background: var(--paper); border-radius: 10px; text-align: center;">
+          <div class="number" style="font-size: 48px;">35</div>
+          <div class="label" style="margin-top: 4px;">volumes</div>
+        </div>
+        <div style="padding: 14px; background: var(--paper); border-radius: 10px; text-align: center;">
+          <div class="number" style="font-size: 48px;">140+</div>
+          <div class="label" style="margin-top: 4px;">colaboradores</div>
+        </div>
+        <div style="padding: 14px; background: var(--paper); border-radius: 10px; text-align: center;">
+          <div class="number" style="font-size: 48px;">25 mil</div>
+          <div class="label" style="margin-top: 4px;">cópias vendidas</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 42 — Google do século 18 ============ -->
+    <section class="slide">
+      <p class="big">A Enciclopédia foi o <em>Google do século 18</em>.</p>
+      <p style="margin-top: 14px;">Antes dela: conhecimento fragmentado, controlado por instituições.</p>
+      <p style="margin-top: 10px;">Depois dela: disponível, sistematizado, transportável.</p>
+      <p style="margin-top: 12px; font-size: 14px; color: var(--ink-soft);">Metade das cópias vendida <strong>fora da França</strong>.</p>
+    </section>
+
+    <!-- ============ 43 — projeto político ============ -->
+    <section class="slide">
+      <div class="eyebrow">Aqui presta atenção</div>
+      <p>A Enciclopédia <strong>não era neutra</strong>.</p>
+      <p style="margin-top: 12px;">Era um projeto político disfarçado de projeto educativo.</p>
+      <p style="margin-top: 12px;">Em cada verbete, sutilmente, atacavam:</p>
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 8px; font-size: 14px;">Absolutismo.</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 8px; font-size: 14px;">Igreja.</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 8px; font-size: 14px;">Privilégios da nobreza.</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 8px; font-size: 14px;">Superstição.</div>
+      </div>
+      <p class="big" style="margin-top: 14px;">Era propaganda inteligente.</p>
+    </section>
+
+    <!-- ============ 44 — Adam Smith ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Adam Smith</div>
+            <div class="life">Escocês · 1723—1790</div>
+          </div>
+        </div>
+        <p style="font-size: 15px;">Em <strong>1776</strong>: <em>A Riqueza das Nações</em>.</p>
+        <p style="font-size: 15px; margin-top: 8px;">Basicamente <strong>fundou a economia moderna</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 45 — mão invisível ============ -->
+    <section class="slide">
+      <div class="eyebrow">A ideia central</div>
+      <p>Quando cada pessoa busca o próprio interesse, no mercado livre…</p>
+      <p class="big" style="margin-top: 14px;">…o resultado, sem ninguém planejar, é o <em>bem coletivo</em>.</p>
+      <div class="illu" style="margin: 18px auto; max-width: 180px;">
+        <svg viewBox="0 0 180 100" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <path d="M90 20 Q70 30 60 50 Q55 65 65 75 Q75 80 85 75 Q95 70 95 60 Q95 50 105 50 Q120 50 125 65 Q125 80 115 85"/>
+          <circle cx="40" cy="80" r="3" fill="#B8862F"/>
+          <circle cx="140" cy="80" r="3" fill="#B8862F"/>
+          <circle cx="90" cy="20" r="3" fill="#B8862F"/>
+        </svg>
+      </div>
+      <p style="text-align: center; font-style: italic; font-family: var(--serif); color: var(--ink-soft);">Como se uma <strong>mão invisível</strong> guiasse o egoísmo em direção ao bem comum.</p>
+    </section>
+
+    <!-- ============ 46 — exemplo padeiro ============ -->
+    <section class="slide">
+      <div class="eyebrow">O exemplo do padeiro</div>
+      <div class="illu sm" style="margin: 14px auto;">
+        <svg viewBox="0 0 120 80" class="draw" fill="none" stroke="#B8862F" stroke-width="1.5">
+          <ellipse cx="60" cy="50" rx="35" ry="18"/>
+          <path d="M30 50 Q60 35 90 50"/>
+          <path d="M40 45 L40 55 M55 42 L55 58 M70 42 L70 58 M85 45 L85 55"/>
+        </svg>
+      </div>
+      <p>O padeiro acorda às <strong>4 da manhã</strong>. Sua. Trabalha.</p>
+      <p style="margin-top: 10px;">Não faz isso por amor a você. Faz pra ganhar dinheiro.</p>
+      <p class="big" style="margin-top: 14px;">Mas o resultado é que você tem <em>pão fresco às 6</em>.</p>
+    </section>
+
+    <!-- ============ 47 — capitalismo liberal ============ -->
+    <section class="slide">
+      <p>Smith argumentou: se você deixa o mercado funcionar com <strong>mínimo de interferência</strong>…</p>
+      <p style="margin-top: 12px;">…gera mais riqueza, mais inovação, mais prosperidade do que qualquer sistema planejado de cima.</p>
+      <p class="big" style="margin-top: 16px;">Essa é a base ideológica do <em>capitalismo liberal</em>.</p>
+    </section>
+
+    <!-- ============ 48 — Smith não era radical ============ -->
+    <section class="slide">
+      <div class="eyebrow">Mas atenção</div>
+      <p>Smith <strong>não</strong> era o liberal radical que muita gente acha.</p>
+      <p style="margin-top: 12px;">Ele também escreveu sobre:</p>
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Limites do mercado.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Importância da moral.</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Necessidade de regulação.</div>
+      </div>
+      <p style="margin-top: 14px; font-size: 14px; color: var(--ink-soft); font-style: italic;">A gente vai entrar fundo nisso na Aula 14.</p>
+    </section>
+
+    <!-- ============ 49 — Kant ============ -->
+    <section class="slide">
+      <div class="thinker-card">
+        <div class="top">
+          <div class="avatar">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#E8C77A" stroke-width="1.5">
+              <circle cx="16" cy="12" r="6"/>
+              <path d="M8 28 Q8 20 16 20 Q24 20 24 28"/>
+            </svg>
+          </div>
+          <div>
+            <div class="name">Immanuel Kant</div>
+            <div class="life">Alemão · 1724—1804</div>
+          </div>
+        </div>
+        <p style="font-size: 15px;">O filósofo <strong>mais difícil</strong> dessa lista.</p>
+        <p style="font-size: 15px; margin-top: 8px;">E o mais profundo.</p>
+      </div>
+    </section>
+
+    <!-- ============ 50 — O que é Iluminismo ============ -->
+    <section class="slide">
+      <p>Em <strong>1784</strong>, escreveu um ensaio chamado:</p>
+      <p style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--accent); margin-top: 8px;">"O que é o Iluminismo?"</p>
+      <p style="margin-top: 18px;">E deu a definição mais famosa do movimento:</p>
+      <p class="quote" style="margin-top: 14px;">"Iluminismo é a saída do ser humano da sua menoridade autoimposta."</p>
+    </section>
+
+    <!-- ============ 51 — menoridade ============ -->
+    <section class="slide">
+      <p><strong>Menoridade</strong>, pra Kant, é a incapacidade de usar o próprio entendimento sem ser guiado por outro.</p>
+      <p style="margin-top: 12px;">É deixar pensarem por você.</p>
+      <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Padre</div>
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Rei</div>
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Tradição</div>
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Família</div>
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Mídia</div>
+        <div style="padding: 8px 10px; background: var(--paper); border-radius: 6px; font-size: 13px; text-align: center;">Partido</div>
+      </div>
+    </section>
+
+    <!-- ============ 52 — sapere aude ============ -->
+    <section class="slide">
+      <p>E propôs um lema, em latim, pra todo iluminista:</p>
+      <p style="text-align: center; font-family: var(--serif); font-style: italic; font-size: 38px; color: var(--accent); margin-top: 20px; letter-spacing: -0.02em;">Sapere aude.</p>
+      <p style="text-align: center; font-family: var(--sans); font-size: 14px; color: var(--ink-soft); letter-spacing: 0.1em; margin-top: 8px;">OUSE SABER.</p>
+      <p style="margin-top: 22px;">Tenha coragem de usar seu próprio entendimento.</p>
+      <p class="big" style="margin-top: 14px;">Esse, pra mim, é o resumo do Iluminismo inteiro.</p>
+    </section>
+
+    <!-- ============ 53 — imperativo categórico ============ -->
+    <section class="slide">
+      <div class="eyebrow">Kant também propôs</div>
+      <h2>O <em>imperativo categórico</em>.</h2>
+      <p style="margin-top: 14px;">Simplificando:</p>
+      <p class="quote" style="margin-top: 12px; font-size: 18px;">Aja como se a regra que você tá seguindo pudesse virar lei universal pra humanidade inteira.</p>
+      <p style="margin-top: 12px;">Se não pode ser generalizada sem virar absurda, é <strong>imoral</strong>.</p>
+    </section>
+
+    <!-- ============ 54 ============ -->
+    <section class="slide">
+      <p>Esse é o fundamento filosófico moderno dos <strong>direitos humanos</strong>.</p>
+      <p style="margin-top: 12px;">Todo ser humano, em qualquer lugar, em qualquer época, tem <strong>dignidade intrínseca</strong>.</p>
+      <p class="big" style="margin-top: 14px;">Não pode ser usado como <em>meio</em> pra fim de outro.</p>
+    </section>
+
+    <!-- ============ 55 — despotismo esclarecido ============ -->
+    <section class="slide">
+      <div class="eyebrow">Agora, uma contradição</div>
+      <p>Esses caras não eram, em maioria, revolucionários.</p>
+      <p style="margin-top: 10px;">Escreviam livro, falavam em salão, jantavam em palácio.</p>
+      <p style="margin-top: 10px;">Alguns davam <strong>conselho pra rei</strong>.</p>
+    </section>
+
+    <!-- ============ 56 ============ -->
+    <section class="slide">
+      <p>Surgiu no século 18 um fenômeno chamado:</p>
+      <h2 style="margin-top: 10px; color: var(--accent);">Despotismo esclarecido.</h2>
+      <p style="margin-top: 14px;">Tentativa de aplicar Iluminismo <strong>sem democracia</strong>.</p>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 14px;">Frederico II · Prússia</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 14px;">Catarina II · Rússia</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 14px;">José II · Áustria</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 14px;">Marquês de Pombal · Portugal</div>
+      </div>
+    </section>
+
+    <!-- ============ 57 ============ -->
+    <section class="slide">
+      <p>Liam Voltaire. Trocavam carta com Diderot. Modernizavam.</p>
+      <p style="margin-top: 12px;">Mas <strong>não abriam mão do poder absoluto</strong>.</p>
+      <p class="quote" style="margin-top: 14px;">"Tudo para o povo, mas sem o povo."</p>
+      <p style="margin-top: 14px;">Em quase todo lugar, falhou. Uma vez que você libera as ideias, não controla mais o que vai acontecer.</p>
+    </section>
+
+    <!-- ============ 58 — impactos ============ -->
+    <section class="slide">
+      <div class="eyebrow">As consequências práticas</div>
+      <h2>O Iluminismo virou <em>realidade</em>.</h2>
+    </section>
+
+    <!-- ============ 59 — Rev Americana ============ -->
+    <section class="slide">
+      <div class="number">01</div>
+      <div class="label" style="margin-top: 8px;">1776</div>
+      <h2 style="margin-top: 12px;">Revolução Americana.</h2>
+      <p style="margin-top: 14px;">As Treze Colônias declararam independência, citando <strong>Locke</strong> quase explicitamente.</p>
+      <p style="margin-top: 8px;">Direitos naturais. Governo por consentimento. Direito de revolução.</p>
+    </section>
+
+    <!-- ============ 60 — Rev Francesa ============ -->
+    <section class="slide">
+      <div class="number">02</div>
+      <div class="label" style="margin-top: 8px;">1789</div>
+      <h2 style="margin-top: 12px;">Revolução Francesa.</h2>
+      <p style="margin-top: 14px;">A grande explosão. O Antigo Regime caiu. O rei foi <strong>guilhotinado</strong>.</p>
+      <p style="margin-top: 10px;">Declaração dos Direitos do Homem e do Cidadão — Locke, Montesquieu, Rousseau, Voltaire, tudo destilado.</p>
+      <p class="big" style="margin-top: 14px; color: var(--accent);">Liberdade, igualdade, fraternidade.</p>
+    </section>
+
+    <!-- ============ 61 — América Latina ============ -->
+    <section class="slide">
+      <div class="number">03</div>
+      <div class="label" style="margin-top: 8px;">Século 19</div>
+      <h2 style="margin-top: 12px;">Independências latino-americanas.</h2>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Simón Bolívar</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">José de San Martín</div>
+        <div style="padding: 10px 14px; background: var(--paper); border-radius: 8px; font-size: 15px;">Tiradentes · Inconfidência Mineira (1789)</div>
+      </div>
+      <p style="margin-top: 12px; font-size: 13px; color: var(--ink-soft); font-style: italic;">Liderada por gente que lia Rousseau em latim, escondido.</p>
+    </section>
+
+    <!-- ============ 62 — Código Napoleônico ============ -->
+    <section class="slide">
+      <div class="number">04</div>
+      <div class="label" style="margin-top: 8px;">1804</div>
+      <h2 style="margin-top: 12px;">Código Napoleônico.</h2>
+      <p style="margin-top: 14px;">Sistematizou o direito civil moderno: igualdade jurídica, propriedade, contratos.</p>
+      <p style="margin-top: 10px;">Influenciou o direito civil de praticamente toda Europa e América Latina.</p>
+      <p style="margin-top: 8px; font-size: 14px; color: var(--ink-soft);">Inclusive o brasileiro.</p>
+    </section>
+
+    <!-- ============ 63 — DH 1948 ============ -->
+    <section class="slide">
+      <div class="number">05</div>
+      <div class="label" style="margin-top: 8px;">1948</div>
+      <h2 style="margin-top: 12px;">Direitos Humanos da ONU.</h2>
+      <p style="margin-top: 14px;">Quando a ONU proclamou a Declaração Universal…</p>
+      <p class="big" style="margin-top: 12px;">…estava, em essência, transcrevendo <em>Kant</em>.</p>
+    </section>
+
+    <!-- ============ 64 — crítica ============ -->
+    <section class="slide">
+      <div class="eyebrow">Agora vou ser crítico</div>
+      <p>Porque você pediu pra eu ser, Gustavo.</p>
+      <p class="big" style="margin-top: 16px;">O Iluminismo <em>não foi perfeito</em>.</p>
+      <p style="margin-top: 10px;">Ignorar isso é leitura ingênua.</p>
+    </section>
+
+    <!-- ============ 65 — eurocêntrico ============ -->
+    <section class="slide">
+      <div class="number">01</div>
+      <div class="label" style="margin-top: 8px;">Limitação</div>
+      <h2 style="margin-top: 12px;">Eurocêntrico.</h2>
+      <p style="margin-top: 14px;">Quando falavam em "direitos universais do homem"…</p>
+      <p style="margin-top: 8px;">muitas vezes queriam dizer: direitos dos homens <strong>europeus, brancos, proprietários</strong>.</p>
+      <p style="margin-top: 12px;">Muita gente ficava de fora.</p>
+    </section>
+
+    <!-- ============ 66 — escravidão ============ -->
+    <section class="slide">
+      <div class="number">02</div>
+      <div class="label" style="margin-top: 8px;">Limitação</div>
+      <h2 style="margin-top: 12px;">Escravidão.</h2>
+      <p style="margin-top: 14px;">Vários iluministas — incluindo <strong>Locke</strong> e <strong>Voltaire</strong> — tinham investimentos em empresas escravagistas.</p>
+      <p class="big" style="margin-top: 14px;">Contradição gritante.</p>
+      <p style="margin-top: 8px;">Defendiam liberdade universal e financiavam tráfico de gente.</p>
+    </section>
+
+    <!-- ============ 67 — mulheres ============ -->
+    <section class="slide">
+      <div class="number">03</div>
+      <div class="label" style="margin-top: 8px;">Limitação</div>
+      <h2 style="margin-top: 12px;">Mulheres.</h2>
+      <p style="margin-top: 14px;">"Direitos do homem" era literalmente <strong>direitos do homem</strong>.</p>
+      <div class="card-soft" style="margin-top: 14px;">
+        <p style="font-size: 14px;"><strong>Olympe de Gouges</strong>, em 1791, publicou a "Declaração dos Direitos da Mulher e da Cidadã".</p>
+        <p style="font-size: 14px; margin-top: 8px;">Foi <strong>guilhotinada</strong> dois anos depois — em parte por causa disso.</p>
+      </div>
+    </section>
+
+    <!-- ============ 68 — colonialismo ============ -->
+    <section class="slide">
+      <div class="number">04</div>
+      <div class="label" style="margin-top: 8px;">Limitação</div>
+      <h2 style="margin-top: 12px;">Colonialismo.</h2>
+      <p style="margin-top: 14px;">A ideia de que a "razão universal" europeia deveria ser levada aos "povos atrasados"…</p>
+      <p style="margin-top: 10px;">…serviu como justificativa pra colonização brutal da África e Ásia.</p>
+      <p style="margin-top: 12px; font-style: italic; color: var(--ink-soft);">A "missão civilizatória" tem raiz iluminista.</p>
+    </section>
+
+    <!-- ============ 69 — excesso razão ============ -->
+    <section class="slide">
+      <div class="number">05</div>
+      <div class="label" style="margin-top: 8px;">Limitação</div>
+      <h2 style="margin-top: 12px;">Excesso de fé na razão.</h2>
+      <p style="margin-top: 14px;">No século 20, <strong>Adorno e Horkheimer</strong> (Escola de Frankfurt) escreveram <em>Dialética do Esclarecimento</em>.</p>
+      <p class="quote" style="margin-top: 14px; font-size: 17px;">A mesma razão que prometia libertar produziu, no limite, os campos de concentração nazistas.</p>
+    </section>
+
+    <!-- ============ 70 ============ -->
+    <section class="slide">
+      <p>Auschwitz, dizem eles, é <strong>também filho do Iluminismo</strong>.</p>
+      <p style="margin-top: 12px;">Uma razão sem ética, instrumental, capaz de organizar tanto uma fábrica quanto um genocídio.</p>
+      <p style="margin-top: 14px;">Não tô dizendo que isso invalida o Iluminismo.</p>
+      <p class="big" style="margin-top: 12px;">Toda ideia grande tem <em>luz e sombra</em>.</p>
+      <p style="margin-top: 8px;">Tem mais luz que sombra. Mas tem sombra. Você precisa enxergar.</p>
+    </section>
+
+    <!-- ============ 71 — RESUMÃO 1 ============ -->
+    <section class="slide">
+      <div class="eyebrow">Resumindo</div>
+      <p>Movimento europeu dos séculos 17 e 18 (especialmente 18).</p>
+      <p style="margin-top: 12px;">Aplicou a razão e o método científico aos assuntos humanos.</p>
+      <p class="big" style="margin-top: 14px; color: var(--accent);">Política. Economia. Religião. Moral.</p>
+    </section>
+
+    <!-- ============ 72 — pensadores ============ -->
+    <section class="slide">
+      <div class="eyebrow">Os principais pensadores</div>
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Locke</strong> · direitos naturais</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Montesquieu</strong> · separação dos poderes</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Voltaire</strong> · tolerância e liberdade</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Rousseau</strong> · soberania popular</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Diderot e d'Alembert</strong> · Enciclopédia</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Adam Smith</strong> · mercado livre</div>
+        <div style="padding: 10px 12px; background: var(--paper); border-radius: 8px; font-size: 13px;"><strong>Kant</strong> · autonomia moral</div>
+      </div>
+    </section>
+
+    <!-- ============ 73 — princípios ============ -->
+    <section class="slide">
+      <div class="eyebrow">Os princípios centrais</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Razão</div>
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Liberdade</div>
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Igualdade</div>
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Tolerância</div>
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Progresso</div>
+        <div style="padding: 10px; background: var(--paper); border-radius: 8px; font-size: 13px; text-align: center;">Estado laico</div>
+      </div>
+      <p style="margin-top: 14px; text-align: center; font-family: var(--serif); font-style: italic; color: var(--accent);">Direitos humanos.</p>
+    </section>
+
+    <!-- ============ 74 — legado ============ -->
+    <section class="slide">
+      <p>Você, hoje, no Brasil…</p>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 6px; font-size: 14px;">votando</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 6px; font-size: 14px;">comprando</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 6px; font-size: 14px;">professando (ou não) uma religião</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 6px; font-size: 14px;">lendo o que você quer</div>
+        <div style="padding: 8px 12px; background: var(--paper); border-radius: 6px; font-size: 14px;">criticando quem você quer</div>
+      </div>
+      <p class="big" style="margin-top: 14px;">…tá usando o <em>sistema operacional</em> desses caras.</p>
+    </section>
+
+    <!-- ============ 75 ============ -->
+    <section class="slide">
+      <p>A Constituição brasileira de <strong>1988</strong> é, em essência, um documento iluminista.</p>
+      <p style="margin-top: 12px;">Os direitos que você tem como cidadão são direitos iluministas.</p>
+      <p class="big" style="margin-top: 14px;">Sem o Iluminismo, o mundo seria muito mais parecido com a <em>Idade Média</em> do que com hoje.</p>
+    </section>
+
+    <!-- ============ 76 — reflexão 1 ============ -->
+    <section class="slide">
+      <div class="eyebrow">Reflexão pra levar · 1</div>
+      <p>Ideias importam.</p>
+      <p style="margin-top: 12px;">Um grupo de gente sem exército, sem trono, sem fortuna, escrevendo livro em café…</p>
+      <p class="big" style="margin-top: 14px;">…pode ser mais poderoso do que qualquer <em>rei</em>.</p>
+      <p style="margin-top: 14px; font-size: 14px; color: var(--ink-soft); font-style: italic;">Locke morreu em 1704 sem ver nada se realizar. 70 anos depois, suas ideias fundaram os EUA.</p>
+    </section>
+
+    <!-- ============ 77 ============ -->
+    <section class="slide">
+      <p>Pergunta pra você:</p>
+      <p class="quote" style="margin-top: 12px;">Você tá tomando decisão pensando só no curto prazo? Ou tá plantando ideias e estruturas que rendem em anos, décadas, gerações?</p>
+      <p style="margin-top: 14px;">A maioria pensa só em curto prazo.</p>
+      <p class="big" style="margin-top: 10px;">Quem muda o mundo, e constrói legado, pensa em <em>prazos absurdos</em>.</p>
+    </section>
+
+    <!-- ============ 78 — reflexão 2 ============ -->
+    <section class="slide">
+      <div class="eyebrow">Reflexão pra levar · 2</div>
+      <p>Olha em volta.</p>
+      <p style="margin-top: 12px;">Quais "menoridades autoimpostas" você ainda carrega?</p>
+      <p style="margin-top: 10px;">Quais autoridades você obedece sem questionar?</p>
+      <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Família</div>
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Religião</div>
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Política</div>
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Profissão</div>
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Mercado</div>
+        <div style="padding: 8px; background: var(--paper); border-radius: 6px; font-size: 12px; text-align: center;">Mídia</div>
+      </div>
+    </section>
+
+    <!-- ============ 79 ============ -->
+    <section class="slide">
+      <p>Iluminismo é movimento intelectual.</p>
+      <p class="big" style="margin-top: 12px;">Mas é, principalmente, uma <em>atitude</em>.</p>
+      <p style="text-align: center; font-family: var(--serif); font-style: italic; font-size: 32px; color: var(--accent); margin-top: 22px;">Sapere aude.</p>
+      <p style="text-align: center; margin-top: 8px;">Ouse saber. Tenha coragem.</p>
+    </section>
+
+    <!-- ============ 80 — gancho próxima ============ -->
+    <section class="slide">
+      <div class="eyebrow">Na próxima aula</div>
+      <p>Eu falei várias vezes em Revolução Francesa e Revolução Americana.</p>
+      <p style="margin-top: 12px;">Junto com a Revolução Industrial, formam o <strong>tripé</strong> que destruiu o Antigo Regime.</p>
+      <p class="big" style="margin-top: 14px;">E construiu, em sangue e fumaça, o <em>mundo moderno</em>.</p>
+    </section>
+
+    <!-- ============ 81 ============ -->
+    <section class="slide">
+      <p>A Revolução Francesa é o evento histórico <strong>mais importante</strong> da Idade Moderna.</p>
+      <p style="margin-top: 12px;">Acabou com a monarquia absolutista. Criou a cidadania moderna. Marcou o início formal da Idade Contemporânea.</p>
+      <p style="margin-top: 14px;">E foi um <strong>banho de sangue</strong>.</p>
+      <p style="margin-top: 8px; font-family: var(--serif); font-style: italic; color: var(--accent);">Idealismo e barbárie, lado a lado.</p>
+      <p style="margin-top: 14px; color: var(--ink-soft);">Mas isso é papo da próxima. Até lá.</p>
+    </section>
+
+    <!-- ============ 82 — INTRO QUIZ ============ -->
+    <section class="slide quiz-intro">
+      <div class="quiz-icon">?</div>
+      <div class="eyebrow" style="text-align: center;">Hora do quiz</div>
+      <h2>Bora ver o que ficou.</h2>
+      <p style="margin-top: 14px;">Sete perguntas rápidas.<br>Se errar, eu te explico na hora.</p>
+    </section>
+
+    <!-- ============ 83 — Q1 ============ -->
+    <section class="slide" data-quiz="1">
+      <div class="question-num">Pergunta 1 de 7</div>
+      <div class="question">Qual evento serviu de <em>inspiração</em> pros iluministas pensarem em aplicar a razão ao mundo humano?</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. A Reforma plantou semente de individualismo, mas não foi o gatilho direto pra ideia de aplicar a razão a tudo.">
+          <span class="letter">A</span><span>A Reforma Protestante.</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">B</span><span>A Revolução Científica — em especial Newton explicando o universo com matemática.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. As Cruzadas são muito anteriores e não têm relação direta com o método racional aplicado ao mundo humano.">
+          <span class="letter">C</span><span>As Cruzadas.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">Exato.</span>Newton, em <strong>1687</strong>, explicou o universo físico com três equações. Os iluministas pensaram: "se dá pra explicar o universo com razão, por que não a política, a economia, a religião?"</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a B.</strong> A Revolução Científica, com Newton à frente, mostrou que a razão dava conta do universo. Os iluministas só ampliaram isso pro mundo humano.</div>
+    </section>
+
+    <!-- ============ 84 — Q2 ============ -->
+    <section class="slide" data-quiz="2">
+      <div class="question-num">Pergunta 2 de 7</div>
+      <div class="question">Quem propôs que todo ser humano nasce com três direitos naturais — vida, liberdade e propriedade?</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. Rousseau falou em vontade geral e contrato social com foco no coletivo, não nos direitos naturais individuais.">
+          <span class="letter">A</span><span>Rousseau.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Kant é o filósofo da autonomia moral e do imperativo categórico — não o autor dos direitos naturais nesse formato.">
+          <span class="letter">B</span><span>Kant.</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">C</span><span>John Locke.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">Boa.</span>Locke, em <strong>1689</strong>, nos <em>Dois Tratados sobre o Governo Civil</em>. Essa ideia virou a base da Declaração de Independência dos EUA, 80 anos depois.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a C.</strong> Locke é o pai do liberalismo. Vida, liberdade e propriedade — direitos que nascem com você, não vêm do rei.</div>
+    </section>
+
+    <!-- ============ 85 — Q3 ============ -->
+    <section class="slide" data-quiz="3">
+      <div class="question-num">Pergunta 3 de 7</div>
+      <div class="question">Por que Montesquieu defendia a separação dos três poderes?</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. Montesquieu não tava preocupado com eficiência administrativa. A preocupação era política, não burocrática.">
+          <span class="letter">A</span><span>Pra deixar o governo mais eficiente e rápido.</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">B</span><span>Porque todo poder tende a abusar. Fragmentar é a forma de um poder vigiar o outro.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Não tem a ver com baratear governo. Tem a ver com evitar a tirania.">
+          <span class="letter">C</span><span>Pra reduzir os custos da administração pública.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">É isso.</span>Quando o Congresso briga com o Supremo, ou o Judiciário questiona o presidente, é <strong>Montesquieu funcionando</strong>. Não é falha — é o sistema fazendo o que foi desenhado pra fazer.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a B.</strong> A lógica é: todo poder tende a abusar. Se você concentra tudo numa pessoa, ela vira tirano. Sempre. Fragmenta e cada poder freia o outro.</div>
+    </section>
+
+    <!-- ============ 86 — Q4 ============ -->
+    <section class="slide" data-quiz="4">
+      <div class="question-num">Pergunta 4 de 7</div>
+      <div class="question">Locke e Rousseau eram <em>iluministas</em>, mas pensavam de formas quase opostas. Qual é a diferença central?</div>
+      <div class="options">
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">A</span><span>Locke foca no indivíduo, propriedade e Estado mínimo. Rousseau foca no coletivo, igualdade e Estado forte.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Os dois defendiam que existe um contrato. A diferença é o que está no centro: indivíduo ou coletivo.">
+          <span class="letter">B</span><span>Locke era contra contrato social. Rousseau era a favor.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Os dois eram críticos da monarquia absolutista. A divergência é entre liberdade individual e igualdade social.">
+          <span class="letter">C</span><span>Locke defendia a monarquia. Rousseau, a república.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">Mandou bem.</span>Essa tensão entre liberdade individual (Locke) e igualdade social (Rousseau) é a <strong>moldura da política moderna</strong>. Direita e esquerda ainda brigam dentro dela.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a A.</strong> Locke = liberalismo, indivíduo, propriedade. Rousseau = republicanismo democrático, coletivo, igualdade.</div>
+    </section>
+
+    <!-- ============ 87 — Q5 ============ -->
+    <section class="slide" data-quiz="5">
+      <div class="question-num">Pergunta 5 de 7</div>
+      <div class="question">A Enciclopédia de Diderot e d'Alembert era um projeto:</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. Ela parecia neutra, mas não era. Cada verbete carregava crítica ao absolutismo, à Igreja e aos privilégios.">
+          <span class="letter">A</span><span>Puramente educativo, sem viés político.</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">B</span><span>Político disfarçado de educativo — atacava absolutismo, Igreja e privilégios em cada verbete.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Foi financiada por subscritores particulares e teve, inclusive, censura real. Era projeto da burguesia iluminista, não do rei.">
+          <span class="letter">C</span><span>Financiado pelo rei francês pra modernizar a administração.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">Exato.</span>Vendeu 25 mil cópias, metade fora da França. Foi um dos <strong>principais combustíveis intelectuais</strong> da Revolução Francesa, 20 anos depois. Propaganda inteligente.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a B.</strong> Parecia neutro. Era propaganda iluminista distribuída em formato de informação útil.</div>
+    </section>
+
+    <!-- ============ 88 — Q6 ============ -->
+    <section class="slide" data-quiz="6">
+      <div class="question-num">Pergunta 6 de 7</div>
+      <div class="question">Qual o significado de "<em>Sapere aude</em>", o lema iluminista de Kant?</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. Não tem relação com 'amar o saber'. É sobre coragem, não sobre amor.">
+          <span class="letter">A</span><span>"Ame o saber."</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">B</span><span>"Ouse saber" — tenha coragem de usar seu próprio entendimento.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. Não é sobre obedecer a sabedoria de outros — é exatamente o oposto: pensar por conta própria.">
+          <span class="letter">C</span><span>"Obedeça ao sábio."</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">É isso.</span>Pra Kant, Iluminismo é <strong>sair da menoridade autoimposta</strong>. Parar de deixar padre, rei, tradição, mídia, partido — pensar por você. Tem coragem. Pensa por conta própria.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a B.</strong> "Ouse saber." É a essência do Iluminismo inteiro: coragem de pensar por conta própria.</div>
+    </section>
+
+    <!-- ============ 89 — Q7 ============ -->
+    <section class="slide" data-quiz="7">
+      <div class="question-num">Pergunta 7 de 7</div>
+      <div class="question">Sobre as <em>limitações</em> do Iluminismo, qual afirmação é correta?</div>
+      <div class="options">
+        <button class="option" data-correct="false" data-explain="Não. O Iluminismo aboliu rapidamente a escravidão? Não. Vários iluministas, incluindo Locke e Voltaire, lucravam com tráfico humano.">
+          <span class="letter">A</span><span>Os iluministas, em peso, lideraram o movimento abolicionista.</span>
+        </button>
+        <button class="option" data-correct="false" data-explain="Não. 'Direitos do homem' era literalmente isso — homem. Olympe de Gouges foi guilhotinada por reivindicar os mesmos direitos pras mulheres.">
+          <span class="letter">B</span><span>Os direitos iluministas já incluíam, desde o início, as mulheres.</span>
+        </button>
+        <button class="option" data-correct="true" data-explain="">
+          <span class="letter">C</span><span>O movimento foi eurocêntrico, ambíguo quanto à escravidão e quase ignorou os direitos das mulheres.</span>
+        </button>
+      </div>
+      <div class="feedback right" data-fb="right"><span class="head">Boa.</span>Toda ideia grande tem <strong>luz e sombra</strong>. O Iluminismo tem mais luz que sombra — mas tem sombra. Eurocentrismo, ambiguidade com a escravidão, exclusão das mulheres, justificativa do colonialismo. Ver a foto completa é parte de pensar com a própria cabeça.</div>
+      <div class="feedback miss" data-fb="miss"><span class="head">Quase.</span><span data-explain-text></span><br><br><strong>A certa é a C.</strong> O Iluminismo foi grandioso, mas eurocêntrico, ambíguo com escravidão, e quase ignorou mulheres. Sapere aude também serve pra olhar criticamente pro próprio Iluminismo.</div>
+    </section>
+
+    <!-- ============ 90 — FIM ============ -->
+    <section class="slide end">
+      <div class="eyebrow" style="color: var(--accent-soft);">Fim da aula</div>
+      <h2>Sapere aude.</h2>
+      <div class="score" id="finalScore">0/7</div>
+      <p id="finalMsg">Você pensou com a própria cabeça.</p>
+      <button class="restart" id="restart">VOLTAR AO INÍCIO</button>
+    </section>
+
+  </div>
+
+  <div class="tap-zone left" id="tapLeft"></div>
+  <div class="tap-zone right" id="tapRight"></div>
+</div>
+
+<script>
+(function() {
+  const slidesEl = document.getElementById('slides');
+  const slides = Array.from(slidesEl.querySelectorAll('.slide'));
+  const progressEl = document.getElementById('progress');
+  const counterEl = document.getElementById('counter');
+  const tapLeft = document.getElementById('tapLeft');
+  const tapRight = document.getElementById('tapRight');
+  const total = slides.length;
+
+  let current = 0;
+  let score = 0;
+  let answered = {};
+
+  // segmentos
+  for (let i = 0; i < total; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.dataset.idx = i;
+    progressEl.appendChild(seg);
+  }
+  const segs = Array.from(progressEl.querySelectorAll('.seg'));
+
+  function go(idx) {
+    if (idx < 0) idx = 0;
+    if (idx >= total) idx = total - 1;
+    if (idx === current) return;
+    const prev = current;
+    current = idx;
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      if (i === current) s.classList.add('active');
+      else if (i < current) s.classList.add('prev');
+    });
+    segs.forEach((s, i) => {
+      s.classList.remove('done', 'current');
+      if (i < current) s.classList.add('done');
+      else if (i === current) s.classList.add('current');
+    });
+    counterEl.textContent = (current + 1) + ' / ' + total;
+    if (slides[current].classList.contains('end')) updateFinal();
+  }
+
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+
+  tapRight.addEventListener('click', next);
+  tapLeft.addEventListener('click', prev);
+
+  // swipe
+  let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) next();
+      else prev();
+    }
+  }, { passive: true });
+
+  // teclado
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // progress bar interativa
+  let dragging = false;
+  function pickFromX(x) {
+    const rect = progressEl.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+    const idx = Math.floor(ratio * total);
+    return Math.min(total - 1, idx);
+  }
+  progressEl.addEventListener('click', e => {
+    if (e.target.classList.contains('seg')) {
+      go(parseInt(e.target.dataset.idx));
+    } else {
+      go(pickFromX(e.clientX));
+    }
+  });
+  progressEl.addEventListener('touchstart', e => {
+    dragging = true;
+    go(pickFromX(e.touches[0].clientX));
+  }, { passive: true });
+  progressEl.addEventListener('touchmove', e => {
+    if (dragging) go(pickFromX(e.touches[0].clientX));
+  }, { passive: true });
+  progressEl.addEventListener('touchend', () => { dragging = false; });
+
+  // quiz
+  document.querySelectorAll('[data-quiz]').forEach(slide => {
+    const qid = slide.dataset.quiz;
+    const options = slide.querySelectorAll('.option');
+    options.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (answered[qid]) return;
+        answered[qid] = true;
+        const isCorrect = opt.dataset.correct === 'true';
+        options.forEach(o => {
+          o.classList.add('disabled');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (!isCorrect) opt.classList.add('wrong');
+        else score++;
+
+        const fbRight = slide.querySelector('[data-fb="right"]');
+        const fbMiss = slide.querySelector('[data-fb="miss"]');
+        if (isCorrect) {
+          fbRight.classList.add('show');
+        } else {
+          const explainText = fbMiss.querySelector('[data-explain-text]');
+          if (explainText) explainText.textContent = opt.dataset.explain || '';
+          fbMiss.classList.add('show');
+        }
+      });
+    });
+  });
+
+  function updateFinal() {
+    const scoreEl = document.getElementById('finalScore');
+    const msgEl = document.getElementById('finalMsg');
+    scoreEl.textContent = score + '/7';
+    let msg = '';
+    if (score === 7) msg = 'Iluminismo puro. Sapere aude na veia.';
+    else if (score >= 5) msg = 'Muito bom. A luz acendeu.';
+    else if (score >= 3) msg = 'Tá no caminho. Volta e revisa os que escaparam.';
+    else msg = 'Tá tudo bem. Volta, revisa, pensa de novo. É isso que iluminista faz.';
+    msgEl.textContent = msg;
+  }
+
+  document.getElementById('restart').addEventListener('click', () => {
+    score = 0;
+    answered = {};
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('correct', 'wrong', 'disabled');
+    });
+    document.querySelectorAll('.feedback').forEach(f => f.classList.remove('show'));
+    go(0);
+  });
+
+  // init
+  segs[0].classList.add('current');
+  counterEl.textContent = '1 / ' + total;
+})();
+</script>
+
+</body>
+</html>
